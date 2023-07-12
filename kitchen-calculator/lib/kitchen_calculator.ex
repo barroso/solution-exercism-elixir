@@ -3,17 +3,22 @@ defmodule KitchenCalculator do
     volume
   end
 
-  def to_milliliter({unit, volume}), do: {:milliliter, volume * get_factor_to_milliliter(unit)}
-  def from_milliliter({:milliliter, volume}, unit), do: {unit, volume / get_factor_to_milliliter(unit)}
+  def to_milliliter({unit, volume}), do: {:milliliter, volume * get_factor(unit, :milliliter)}
+  def from_milliliter({:milliliter, volume}, unit), do: {unit, volume / get_factor(unit, :milliliter)}
 
-  def convert({:teaspoon, volume}, :tablespoon = unit), do: to_milliliter({unit, volume / 3}) |> from_milliliter(unit)
-  def convert({:cup, volume}, :fluid_ounce = unit), do: to_milliliter({unit, volume * 8}) |> from_milliliter(unit)
-  def convert({:fluid_ounce, volume}, :teaspoon = unit), do: to_milliliter({unit, volume * 6}) |> from_milliliter(unit)
-  def convert({:tablespoon, volume}, :cup = unit), do: to_milliliter({unit, volume / 16}) |> from_milliliter(unit)
+  def convert({initial_origin, volume}, unit) do
+    adjusted_volume = round(volume * get_factor(initial_origin, unit))
+    to_milliliter({unit, adjusted_volume}) |> from_milliliter(unit)
+  end
 
-  defp get_factor_to_milliliter(:milliliter), do: 1
-  defp get_factor_to_milliliter(:cup), do: 240
-  defp get_factor_to_milliliter(:fluid_ounce), do: 30
-  defp get_factor_to_milliliter(:teaspoon), do: 5
-  defp get_factor_to_milliliter(:tablespoon), do: 15
+  defp get_factor(:milliliter, :milliliter), do: 1
+  defp get_factor(:cup, :milliliter), do: 240
+  defp get_factor(:fluid_ounce, :milliliter), do: 30
+  defp get_factor(:teaspoon, :milliliter), do: 5
+  defp get_factor(:tablespoon, :milliliter), do: 15
+  defp get_factor(:teaspoon, :tablespoon), do: 0.3333333333
+  defp get_factor(:cup, :fluid_ounce), do: 8
+  defp get_factor(:fluid_ounce, :teaspoon), do: 6
+  defp get_factor(:tablespoon, :cup), do: 0.0625
+  #add other conversions
 end
